@@ -49,8 +49,16 @@ docker run --pull=always --rm -it -p 8080:8080 --user=root -v /var/run/docker.so
 
 Kestra is now available here: http://localhost:8080/
 
-Update `kestra/01_gcp_kv.yaml` to include your service account, GCP project ID, BigQuery dataset and GCS bucket name (along with their location) as KV Store values:
+Add flows programmatically using Kestra's API:
 
+````
+cd kestra
+curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@01_gcp_kv.yaml
+curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@02_gcp_rti.yaml
+
+````
+
+Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
 - GCP_CREDS
 - GCP_PROJECT_ID
 - GCP_LOCATION
@@ -61,9 +69,3 @@ Warning
 
 The GCP_CREDS service account contains sensitive information. Ensure you keep it secure and do not commit it to Git. Keep it as secure as your passwords.
 
-Add flows programmatically using Kestra's API:
-
-````
-cd kestra
-curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@01_gcp_kv.yaml
-````
