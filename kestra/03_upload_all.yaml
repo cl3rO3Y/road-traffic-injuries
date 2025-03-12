@@ -108,6 +108,7 @@ tasks:
           - "{{ outputs.upload_to_gcs[taskrun.value].uri }}"
         destinationTable: "{{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging"
         format: CSV
+        maxBadRecords: 10
         csvOptions:
           fieldDelimiter: ";"
           skipLeadingRows: 1
@@ -116,8 +117,8 @@ tasks:
         runIf: "{{ json(taskrun.value).type == 'users'}}"
         type: io.kestra.plugin.gcp.bigquery.Query
         sql: |
-          MERGE INTO {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }} AS T
-          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging}} AS S
+          MERGE INTO {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }} AS T
+          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging AS S
           ON T.id_usager = S.id_usager
           WHEN NOT MATCHED THEN
             INSERT (
@@ -130,7 +131,7 @@ tasks:
       - id: bigquery_users_truncate_staging_table
         type: io.kestra.plugin.gcp.bigquery.Query
         sql: |
-          TRUNCATE TABLE {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging}};
+          TRUNCATE TABLE {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging;
   
  ## - id: purge_files
  ##   type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
