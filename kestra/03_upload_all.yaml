@@ -26,6 +26,15 @@ variables:
     - url: "https://www.data.gouv.fr/fr/datasets/r/ba5a1956-7e82-41b7-a602-89d7dd484d7a"
       type: "users"
       year: "2021"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/104dbb32-704f-4e99-a71e-43563cb604f2"
+      type: "details"
+      year: "2023"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/5fc299c0-4598-4c29-b74c-6a67b0cc27e7"
+      type: "details"
+      year: "2022"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/85cfdc0c-23e4-4674-9bcd-79a970d7269b"
+      type: "details"
+      year: "2021"
 
 tasks:
   - id: bq_users_table
@@ -50,14 +59,77 @@ tasks:
         actp STRING OPTIONS (description = "Pedestrian action: -1 - Unknown ; Moving: 0 - Not known or not applicable ; 1 - Direction of striking vehicle ; 2 - Opposite direction of vehicle ; Miscellaneous: 3 - Crossing ; 4 - Masked ; 5 - Playing - running ; 6 - With animal ; 9 - Other: A - Getting in/out of vehicle ; B - Unknown"),
         etatp INTEGER OPTIONS (description = "Specifies whether the pedestrian involved in the accident was alone or not: -1 - Not known ; 1 - Alone ; 2 - Accompanied ; 3 - In a group.")
       )
+
+  - id: bq_users_staging_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.users_staging`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identifier."),
+        id_usager STRING OPTIONS (description = "User's unique identifier (including pedestrians, who are attached to the vehicles that hit them)."),
+        id_vehicule STRING OPTIONS (description = "Unique identifier of the vehicle for each user occupying the vehicle (including pedestrians who are attached to the vehicles that hit them."),
+        num_veh STRING OPTIONS (description = "Identifier of the vehicle taken over for each of the users occupying this vehicle (including pedestrians attached to the vehicles that hit them)."),
+        place INTEGER OPTIONS (description = "Position of the user in the vehicle at the time of the accident."),
+        catu INTEGER OPTIONS (description = "User category: 1 - Driver ; 2 - Passenger ; 3 - Pedestrian"),
+        grav INTEGER OPTIONS (description = "Severity of user injury, accident victims are classified into three categories of victims plus those uninjured: 1 - Uninjured ; 2 - Killed ; 3 - Hospitalized ; 4 - Slightly injured"),
+        sexe INTEGER OPTIONS (description = "Gender of user: 1 - Male ; 2 - Female"),
+        an_nais INTEGER OPTIONS (description = "User's year of birth."),
+        trajet INTEGER OPTIONS (description = "Reason for journey at time of accident: -1 - Not specified ; 0 - Not specified ; 1 - Home - Work ; 2 - Home - School ; 3 - Shopping ; 4 - Professional use ; 5 - Walking - Leisure ; 9 - Other"),
+        secu1 INTEGER OPTIONS (description = "Presence and use of safety equipment: -1 - Not specified ; 0 - No equipment ; 1 - Belt ; 2 - Helmet ; 3 - Children's device ; 4 - Reflective vest ; 5 - Airbag (2WD/3WD) ; 6 - Gloves (2WD/3WD) ; 7 - Gloves + Airbag (2WD/3WD) ; 8 - Non determinable ; 9 - Other."),
+        secu2 INTEGER OPTIONS (description = "Presence and use of safety equipment: -1 - Not specified ; 0 - No equipment ; 1 - Belt ; 2 - Helmet ; 3 - Children's device ; 4 - Reflective vest ; 5 - Airbag (2WD/3WD) ; 6 - Gloves (2WD/3WD) ; 7 - Gloves + Airbag (2WD/3WD) ; 8 - Non determinable ; 9 - Other."),
+        secu3 INTEGER OPTIONS (description = "Presence and use of safety equipment: -1 - Not specified ; 0 - No equipment ; 1 - Belt ; 2 - Helmet ; 3 - Children's device ; 4 - Reflective vest ; 5 - Airbag (2WD/3WD) ; 6 - Gloves (2WD/3WD) ; 7 - Gloves + Airbag (2WD/3WD) ; 8 - Non determinable ; 9 - Other."),
+        locp INTEGER OPTIONS (description = "Pedestrian location : -1 - Not specified ; 0 - Not applicable ; On pavement: 1 - At + 50 m from crosswalk ; 2 - At - 50 m from crosswalk ; On crosswalk: 3 - Without light signal ; 4 - With light signal ; Other: 5 - On sidewalk ; 6 - On shoulder; 7 - On refuge or BAU ; 8 - On driveway ; 9 - Unknown"),
+        actp STRING OPTIONS (description = "Pedestrian action: -1 - Unknown ; Moving: 0 - Not known or not applicable ; 1 - Direction of striking vehicle ; 2 - Opposite direction of vehicle ; Miscellaneous: 3 - Crossing ; 4 - Masked ; 5 - Playing - running ; 6 - With animal ; 9 - Other: A - Getting in/out of vehicle ; B - Unknown"),
+        etatp INTEGER OPTIONS (description = "Specifies whether the pedestrian involved in the accident was alone or not: -1 - Not known ; 1 - Alone ; 2 - Accompanied ; 3 - In a group.")
+      );
+  - id: bq_details_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.details`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identification number."),
+        jour INTEGER OPTIONS (description = "Day of accident."),
+        mois INTEGER OPTIONS (description = "Month of accident."),
+        an INTEGER OPTIONS (description = "Year of accident."),
+        hrmn STRING OPTIONS (description = "Hour and minutes of accident."),
+        lum INTEGER OPTIONS (description = "Light: lighting conditions in which the accident occurred: 1 - Daylight ; 2 - Dusk or dawn ; 3 - Night without street lighting ; 4 - Night with street lighting off ; 5 - Night with street lighting on"),
+        dep STRING OPTIONS (description = "French department code."),
+        com STRING OPTIONS (description = "French commune number as an INSEE code. The code is composed of the INSEE code followed by 3 digits."),
+        agg INTEGER OPTIONS (description = "Location: 1 - Outside built-up area ; 2 - In built-up areas"),
+        int INTEGER OPTIONS (description = "Intersection: 1 - Outside intersection ; 2 - X-shaped intersection ; 3 - Intersection in T ; 4 - Y intersection ; 5 - Intersection with more than 4 branches ; 6 - Roundabout ; 7 - Square ; 8 - Level crossing ; 9 - Other intersection"),
+        atm INTEGER OPTIONS (description = "Weather conditions: -1 - Unknown ; 1 - Normal ; 2 - Light rain ; 3 - Heavy rain ; 4 - Snow - hail ; 5 - Fog - smoke ; 6 - Strong wind - storm ; 7 - Dazzling weather ; 8 - Overcast ; 9 - Other"),
+        col INTEGER OPTIONS (description = "Type of collision: -1 - Unknown ; 1 - Two vehicles - head-on ; 2 - Two vehicles - rear ; 3 - Two vehicles - side ; 4 - Three or more vehicles - chain ; 5 - Three or more vehicles - multiple collisions ; 6 - Other collision ; 7 - No collision"),
+        adr STRING OPTIONS (description = "Postal address: variable entered for accidents occurring in built-up areas."),
+        lat FLOAT64 OPTIONS (description = "Latitude."),
+        long FLOAT64 OPTIONS (description = "Longitude")
+      )
+
+  - id: bq_details_staging_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.details_staging`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identification number."),
+        jour INTEGER OPTIONS (description = "Day of accident."),
+        mois INTEGER OPTIONS (description = "Month of accident."),
+        an INTEGER OPTIONS (description = "Year of accident."),
+        hrmn STRING OPTIONS (description = "Hour and minutes of accident."),
+        lum INTEGER OPTIONS (description = "Light: lighting conditions in which the accident occurred: 1 - Daylight ; 2 - Dusk or dawn ; 3 - Night without street lighting ; 4 - Night with street lighting off ; 5 - Night with street lighting on"),
+        dep STRING OPTIONS (description = "French department code."),
+        com STRING OPTIONS (description = "French commune number as an INSEE code. The code is composed of the INSEE code followed by 3 digits."),
+        agg INTEGER OPTIONS (description = "Location: 1 - Outside built-up area ; 2 - In built-up areas"),
+        int INTEGER OPTIONS (description = "Intersection: 1 - Outside intersection ; 2 - X-shaped intersection ; 3 - Intersection in T ; 4 - Y intersection ; 5 - Intersection with more than 4 branches ; 6 - Roundabout ; 7 - Square ; 8 - Level crossing ; 9 - Other intersection"),
+        atm INTEGER OPTIONS (description = "Weather conditions: -1 - Unknown ; 1 - Normal ; 2 - Light rain ; 3 - Heavy rain ; 4 - Snow - hail ; 5 - Fog - smoke ; 6 - Strong wind - storm ; 7 - Dazzling weather ; 8 - Overcast ; 9 - Other"),
+        col INTEGER OPTIONS (description = "Type of collision: -1 - Unknown ; 1 - Two vehicles - head-on ; 2 - Two vehicles - rear ; 3 - Two vehicles - side ; 4 - Three or more vehicles - chain ; 5 - Three or more vehicles - multiple collisions ; 6 - Other collision ; 7 - No collision"),
+        adr STRING OPTIONS (description = "Postal address: variable entered for accidents occurring in built-up areas."),
+        lat FLOAT64 OPTIONS (description = "Latitude."),
+        long FLOAT64 OPTIONS (description = "Longitude")
+      );
+
   - id: upload_files
     type: io.kestra.plugin.core.flow.ForEach
     values: "{{ vars.files_to_upload }}"
-    tasks:
-      - id: debug
-        type: io.kestra.plugin.core.debug.Return
-        format: "{{ json(taskrun.value).url }}"
-        
+    tasks: 
       - id: download_file
         type: io.kestra.plugin.core.http.Download
         uri: "{{ json(taskrun.value).url }}"
@@ -67,58 +139,23 @@ tasks:
         from: "{{ outputs.download_file[taskrun.value].uri }}"
         to: "gs://{{kv('GCP_BUCKET_NAME')}}/{{ json(taskrun.value).type }}{{ json(taskrun.value).year }}.csv"
 
-      - id: bq_users_staging_table
-        runIf: "{{ json(taskrun.value).type == 'users'}}"
-        type: io.kestra.plugin.gcp.bigquery.Query
-        sql: |
-          CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging`
-          (
-            Num_Acc INTEGER OPTIONS (description = "Accident identifier."),
-            id_usager STRING OPTIONS (description = "User's unique identifier (including pedestrians, who are attached to the vehicles that hit them)."),
-            id_vehicule STRING OPTIONS (description = "Unique identifier of the vehicle for each user occupying the vehicle (including pedestrians who are attached to the vehicles that hit them."),
-            num_veh STRING OPTIONS (description = "Identifier of the vehicle taken over for each of the users occupying this vehicle (including pedestrians attached to the vehicles that hit them)."),
-            place INTEGER OPTIONS (description = "Position of the user in the vehicle at the time of the accident."),
-            catu INTEGER OPTIONS (description = "User category: 1 - Driver ; 2 - Passenger ; 3 - Pedestrian"),
-            grav INTEGER OPTIONS (description = "Severity of user injury, accident victims are classified into three categories of victims plus those uninjured: 1 - Uninjured ; 2 - Killed ; 3 - Hospitalized ; 4 - Slightly injured"),
-            sexe INTEGER OPTIONS (description = "Gender of user: 1 - Male ; 2 - Female"),
-            an_nais INTEGER OPTIONS (description = "User's year of birth."),
-            trajet INTEGER OPTIONS (description = "Reason for journey at time of accident: -1 - Not specified ; 0 - Not specified ; 1 - Home - Work ; 2 - Home - School ; 3 - Shopping ; 4 - Professional use ; 5 - Walking - Leisure ; 9 - Other"),
-            secu1 INTEGER OPTIONS (description = "Presence and use of safety equipment: -1 - Not specified ; 0 - No equipment ; 1 - Belt ; 2 - Helmet ; 3 - Children's device ; 4 - Reflective vest ; 5 - Airbag (2WD/3WD) ; 6 - Gloves (2WD/3WD) ; 7 - Gloves + Airbag (2WD/3WD) ; 8 - Non determinable ; 9 - Other."),
-            secu2 INTEGER OPTIONS (description = "Presence and use of safety equipment: -1 - Not specified ; 0 - No equipment ; 1 - Belt ; 2 - Helmet ; 3 - Children's device ; 4 - Reflective vest ; 5 - Airbag (2WD/3WD) ; 6 - Gloves (2WD/3WD) ; 7 - Gloves + Airbag (2WD/3WD) ; 8 - Non determinable ; 9 - Other."),
-            secu3 INTEGER OPTIONS (description = "Presence and use of safety equipment: -1 - Not specified ; 0 - No equipment ; 1 - Belt ; 2 - Helmet ; 3 - Children's device ; 4 - Reflective vest ; 5 - Airbag (2WD/3WD) ; 6 - Gloves (2WD/3WD) ; 7 - Gloves + Airbag (2WD/3WD) ; 8 - Non determinable ; 9 - Other."),
-            locp INTEGER OPTIONS (description = "Pedestrian location : -1 - Not specified ; 0 - Not applicable ; On pavement: 1 - At + 50 m from crosswalk ; 2 - At - 50 m from crosswalk ; On crosswalk: 3 - Without light signal ; 4 - With light signal ; Other: 5 - On sidewalk ; 6 - On shoulder; 7 - On refuge or BAU ; 8 - On driveway ; 9 - Unknown"),
-            actp STRING OPTIONS (description = "Pedestrian action: -1 - Unknown ; Moving: 0 - Not known or not applicable ; 1 - Direction of striking vehicle ; 2 - Opposite direction of vehicle ; Miscellaneous: 3 - Crossing ; 4 - Masked ; 5 - Playing - running ; 6 - With animal ; 9 - Other: A - Getting in/out of vehicle ; B - Unknown"),
-            etatp INTEGER OPTIONS (description = "Specifies whether the pedestrian involved in the accident was alone or not: -1 - Not known ; 1 - Alone ; 2 - Accompanied ; 3 - In a group.")
-          );
-
-      - id: bigquery_users_copy_in
-        runIf: "{{ json(taskrun.value).type == 'baba'}}"
-        type: io.kestra.plugin.gcp.bigquery.Load
-        from: "{{ outputs.download_file[taskrun.value].uri }}"
-        destinationTable: "{{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging}}"
-        format: CSV
-        csvOptions:
-          fieldDelimiter: ";"
-          skipLeadingRows: 1
-
-      - id: bigquery_users_copy_in2
-        runIf: "{{ json(taskrun.value).type == 'users'}}"
+      - id: bq_copy_in
         type: io.kestra.plugin.gcp.bigquery.LoadFromGcs
         from:
           - "{{ outputs.upload_to_gcs[taskrun.value].uri }}"
-        destinationTable: "{{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging"
+        destinationTable: "{{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging"
         format: CSV
         maxBadRecords: 10
         csvOptions:
           fieldDelimiter: ";"
           skipLeadingRows: 1
 
-      - id: bigquery_users_merge_data
+      - id: bq_users_merge_data
         runIf: "{{ json(taskrun.value).type == 'users'}}"
         type: io.kestra.plugin.gcp.bigquery.Query
         sql: |
           MERGE INTO {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }} AS T
-          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging AS S
+          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging AS S
           ON T.id_usager = S.id_usager
           WHEN NOT MATCHED THEN
             INSERT (
@@ -128,10 +165,25 @@ tasks:
               S.Num_Acc, S.id_usager, S.id_vehicule, S.num_veh, S.place, S.catu, S.grav, S.sexe, S.an_nais, S.trajet, S.secu1, S.secu2, S.secu3, S.locp, S.actp, S.etatp
             );
 
-      - id: bigquery_users_truncate_staging_table
+      - id: bq_details_merge_data
+        runIf: "{{ json(taskrun.value).type == 'details'}}"
         type: io.kestra.plugin.gcp.bigquery.Query
         sql: |
-          TRUNCATE TABLE {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_{{ json(taskrun.value).year }}_staging;
+          MERGE INTO {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }} AS T
+          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging AS S
+          ON T.Num_Acc = S.Num_Acc
+          WHEN NOT MATCHED THEN
+            INSERT (
+              Num_Acc, jour, mois, an, hrmn, lum, dep, com, agg, int, atm, col, adr, lat, long
+            )
+            VALUES (
+              S.Num_Acc, S.jour, S.mois, S.an, S.hrmn, S.lum, S.dep, S.com, S.agg, S.int, S.atm, S.col, S.adr, S.lat, S.long
+            );
+
+      - id: bq_truncate_staging_table
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          TRUNCATE TABLE {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging;
   
  ## - id: purge_files
  ##   type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles

@@ -41,7 +41,7 @@ resource "google_bigquery_dataset" "rti_dataset" {
   dataset_id                  = var.bq_dataset_name
   friendly_name               = var.bq_dataset_name
   location                    = var.location
-  default_table_expiration_ms = 3600000
+  default_table_expiration_ms = 360000000
 
   labels = {
     env = "default"
