@@ -44,6 +44,15 @@ variables:
     - url: "https://www.data.gouv.fr/fr/datasets/r/0bb5953a-25d8-46f8-8c25-b5c2f5ba905e"
       type: "vehicles"
       year: "2021"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/8bef19bf-a5e4-46b3-b5f9-a145da4686bc"
+      type: "places"
+      year: "2023"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/a6ef711a-1f03-44cb-921a-0ce8ec975995"
+      type: "places"
+      year: "2022"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/8a4935aa-38cd-43af-bf10-0209d6d17434"
+      type: "places"
+      year: "2021"
 
 tasks:
   - id: bq_users_table
@@ -172,6 +181,56 @@ tasks:
         occutc INTEGER OPTIONS (description = "Number of occupants in public transport.")
       );
 
+  - id: bq_places_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.places`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identifier."),
+        catr INTEGER OPTIONS (description = "Road category: 1 - Motorway ; 2 - National road ; 3 - Route Départementale ; 4 - Voie Communales ; 5 - Not part of the public network ; 6 - Car park open to public traffic ; 7 - Urban roads ; 9 - Other."),
+        voie STRING OPTIONS (description = "Road number."),
+        v1 INTEGER OPTIONS (description = "Numerical index of road number (example: 2 bis, 3 ter etc.)."),
+        v2 STRING OPTIONS (description = "Alphanumeric road index letter."),
+        circ INTEGER OPTIONS (description = "Traffic regime: -1 - Not specified ; 1 - One-way ; 2 - Two-way ; 3 - Divided ; 4 - With variable lanes."),
+        nbv INTEGER OPTIONS (description = "Total number of traffic lanes."),
+        vosp INTEGER OPTIONS (description = "Indicates the existence of a dedicated lane, regardless of whether or not the accident occurs on this lane. (-1 - Not specified ; 0 - Not applicable ; 1 - Cycle track ; 2 - Cycle lane ; 3 - Reserved lane"),
+        prof INTEGER OPTIONS (description = "Longitudinal profile describes the gradient of the road at the accident location (see docs)."),
+        pr INTEGER OPTIONS (description = "Number of the connecting PR (upstream terminal number). A value of -1 means that the PR is not filled in."),
+        pr1 STRING OPTIONS (description = "Distance in meters to PR (from upstream terminal). A value of -1 means that the PR is not filled in."),
+        plan INTEGER OPTIONS (description = "Plane layout: -1 - Not specified ; 1 - Straight section ; 2 - Left-hand curve ; 3 - Right-hand curve ; 4 - S-shaped."),
+        lartpc FLOAT64 OPTIONS (description = "Width of central reservation (TPC) if any (in m)."),
+        larrout FLOAT64 OPTIONS (description = "Width of carriageway used for vehicular traffic, excluding hard shoulder, TPC and parking spaces (in m)."),
+        surf INTEGER OPTIONS (description = "Surface condition: -1 - Not specified ; 1 - Normal ; 2 - Wet ; 3 - Puddled ; 4 - Flooded ; 5 - Snowy ; 6 - Muddy ; 7 - Icy ; 8 - Grease - oil ; 9 - Other"),
+        infra INTEGER OPTIONS (description = "Infrastructure: -1 - No information ; 0 - None ; 1 - Underground - tunnel ; 2 - Bridge - autopont ; 3 - Interchange or connecting slip road ; 4 - Railway line ; 5 - Crossroads ; 6 - Pedestrian zone ; 7 - Toll plaza ; 8 - Construction site ; 9 - Other"),
+        situ INTEGER OPTIONS (description = "Accident situation: -1 - Unknown ; 0 - None ; 1 - On carriageway ; 2 - On hard shoulder ; 3 - On shoulder ; 4 - On sidewalk ; 5 - On cycle track ; 6 - On other special lanes ; 8 - Other"),
+        vma INTEGER OPTIONS (description = "Maximum authorized speed at the place and time of the accident.")
+      );
+
+  - id: bq_places_staging_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.places_staging`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identifier."),
+        catr INTEGER OPTIONS (description = "Road category: 1 - Motorway ; 2 - National road ; 3 - Route Départementale ; 4 - Voie Communales ; 5 - Not part of the public network ; 6 - Car park open to public traffic ; 7 - Urban roads ; 9 - Other."),
+        voie STRING OPTIONS (description = "Road number."),
+        v1 INTEGER OPTIONS (description = "Numerical index of road number (example: 2 bis, 3 ter etc.)."),
+        v2 STRING OPTIONS (description = "Alphanumeric road index letter."),
+        circ INTEGER OPTIONS (description = "Traffic regime: -1 - Not specified ; 1 - One-way ; 2 - Two-way ; 3 - Divided ; 4 - With variable lanes."),
+        nbv INTEGER OPTIONS (description = "Total number of traffic lanes."),
+        vosp INTEGER OPTIONS (description = "Indicates the existence of a dedicated lane, regardless of whether or not the accident occurs on this lane. (-1 - Not specified ; 0 - Not applicable ; 1 - Cycle track ; 2 - Cycle lane ; 3 - Reserved lane"),
+        prof INTEGER OPTIONS (description = "Longitudinal profile describes the gradient of the road at the accident location (see docs)."),
+        pr INTEGER OPTIONS (description = "Number of the connecting PR (upstream terminal number). A value of -1 means that the PR is not filled in."),
+        pr1 STRING OPTIONS (description = "Distance in meters to PR (from upstream terminal). A value of -1 means that the PR is not filled in."),
+        plan INTEGER OPTIONS (description = "Plane layout: -1 - Not specified ; 1 - Straight section ; 2 - Left-hand curve ; 3 - Right-hand curve ; 4 - S-shaped."),
+        lartpc FLOAT64 OPTIONS (description = "Width of central reservation (TPC) if any (in m)."),
+        larrout FLOAT64 OPTIONS (description = "Width of carriageway used for vehicular traffic, excluding hard shoulder, TPC and parking spaces (in m)."),
+        surf INTEGER OPTIONS (description = "Surface condition: -1 - Not specified ; 1 - Normal ; 2 - Wet ; 3 - Puddled ; 4 - Flooded ; 5 - Snowy ; 6 - Muddy ; 7 - Icy ; 8 - Grease - oil ; 9 - Other"),
+        infra INTEGER OPTIONS (description = "Infrastructure: -1 - No information ; 0 - None ; 1 - Underground - tunnel ; 2 - Bridge - autopont ; 3 - Interchange or connecting slip road ; 4 - Railway line ; 5 - Crossroads ; 6 - Pedestrian zone ; 7 - Toll plaza ; 8 - Construction site ; 9 - Other"),
+        situ INTEGER OPTIONS (description = "Accident situation: -1 - Unknown ; 0 - None ; 1 - On carriageway ; 2 - On hard shoulder ; 3 - On shoulder ; 4 - On sidewalk ; 5 - On cycle track ; 6 - On other special lanes ; 8 - Other"),
+        vma INTEGER OPTIONS (description = "Maximum authorized speed at the place and time of the accident.")
+      );
+
   - id: upload_files
     type: io.kestra.plugin.core.flow.ForEach
     values: "{{ vars.files_to_upload }}"
@@ -191,7 +250,7 @@ tasks:
           - "{{ outputs.upload_to_gcs[taskrun.value].uri }}"
         destinationTable: "{{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging"
         format: CSV
-        maxBadRecords: 10
+        maxBadRecords: 100
         csvOptions:
           fieldDelimiter: ";"
           skipLeadingRows: 1
@@ -239,6 +298,21 @@ tasks:
             )
             VALUES (
               S.Num_Acc, S.id_vehicule, S.num_veh, S.senc, S.catv, S.obs, S.obsm, S.choc, S.manv, S.motor, S.occutc
+            );
+
+      - id: bq_places_merge_data
+        runIf: "{{ json(taskrun.value).type == 'places'}}"
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          MERGE INTO {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }} AS T
+          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging AS S
+          ON T.Num_Acc = S.Num_Acc
+          WHEN NOT MATCHED THEN
+            INSERT (
+              Num_Acc, catr, voie, v1, v2, circ, nbv, vosp, prof, pr, pr1, plan, lartpc, larrout, surf, infra, situ, vma
+            )
+            VALUES (
+              S.Num_Acc, S.catr, S.voie, S.v1, S.v2, S.circ, S.nbv, S.vosp, S.prof, S.pr, S.pr1, S.plan, S.lartpc, S.larrout, S.surf, S.infra, S.situ, S.vma
             );
 
       - id: bq_truncate_staging_table
