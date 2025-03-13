@@ -35,6 +35,15 @@ variables:
     - url: "https://www.data.gouv.fr/fr/datasets/r/85cfdc0c-23e4-4674-9bcd-79a970d7269b"
       type: "details"
       year: "2021"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/146a42f5-19f0-4b3e-a887-5cd8fbef057b"
+      type: "vehicles"
+      year: "2023"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/c9742921-4427-41e5-81bc-f13af8bc31a0"
+      type: "vehicles"
+      year: "2022"
+    - url: "https://www.data.gouv.fr/fr/datasets/r/0bb5953a-25d8-46f8-8c25-b5c2f5ba905e"
+      type: "vehicles"
+      year: "2021"
 
 tasks:
   - id: bq_users_table
@@ -82,6 +91,7 @@ tasks:
         actp STRING OPTIONS (description = "Pedestrian action: -1 - Unknown ; Moving: 0 - Not known or not applicable ; 1 - Direction of striking vehicle ; 2 - Opposite direction of vehicle ; Miscellaneous: 3 - Crossing ; 4 - Masked ; 5 - Playing - running ; 6 - With animal ; 9 - Other: A - Getting in/out of vehicle ; B - Unknown"),
         etatp INTEGER OPTIONS (description = "Specifies whether the pedestrian involved in the accident was alone or not: -1 - Not known ; 1 - Alone ; 2 - Accompanied ; 3 - In a group.")
       );
+
   - id: bq_details_table
     type: io.kestra.plugin.gcp.bigquery.Query
     sql: |
@@ -124,6 +134,42 @@ tasks:
         adr STRING OPTIONS (description = "Postal address: variable entered for accidents occurring in built-up areas."),
         lat FLOAT64 OPTIONS (description = "Latitude."),
         long FLOAT64 OPTIONS (description = "Longitude")
+      );
+
+  - id: bq_vehicles_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.vehicles`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identifier."),
+        id_vehicule STRING OPTIONS (description = "Unique identifier of the vehicle for each user occupying the vehicle (including pedestrians)."),
+        num_veh STRING OPTIONS (description = "Identifier of the vehicle taken over for each user occupying this vehicle (including any pedestrians who are attached to the vehicles that hit them) - Alphanumeric code."),
+        senc INTEGER OPTIONS (description = "Direction of traffic: -1 - Not specified ; 0 - Unknown ; 1 - PK or PR or postal address number ascending ; 2 - Decreasing PK or PR or postal address number ; 3 - No reference"),
+        catv INTEGER OPTIONS (description = "Vehicle category (see in docs)."),
+        obs INTEGER OPTIONS (description = "Fixed obstacle hit (see in docs)."),
+        obsm INTEGER OPTIONS (description = "Mobile obstacle hit: -1 - Not specified ; 0 - No obstacle ; 1 - Pedestrian ; 2 - Vehicle ; 4 - Rail vehicle ; 5 - Domestic animal ; 6 - Wild animal ; 9 - Other"),
+        choc INTEGER OPTIONS (description = "Initial point of impact (see in docs)."),
+        manv INTEGER OPTIONS (description = "Main manoeuvre before the accident (see in docs)."),
+        motor INTEGER OPTIONS (description = "Type of vehicle engine: -1 - Unknown ; 0 - Unknown ; 1 - Hydrocarbon ; 2 - Hybrid electric ; 3 - Electric ; 4 - Hydrogen ; 5 - Human ; 6 - Other."),
+        occutc INTEGER OPTIONS (description = "Number of occupants in public transport.")
+      )
+
+  - id: bq_vehicles_staging_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE TABLE IF NOT EXISTS `{{kv('GCP_DATASET')}}.vehicles_staging`
+      (
+        Num_Acc INTEGER OPTIONS (description = "Accident identifier."),
+        id_vehicule STRING OPTIONS (description = "Unique identifier of the vehicle for each user occupying the vehicle (including pedestrians)."),
+        num_veh STRING OPTIONS (description = "Identifier of the vehicle taken over for each user occupying this vehicle (including any pedestrians who are attached to the vehicles that hit them) - Alphanumeric code."),
+        senc INTEGER OPTIONS (description = "Direction of traffic: -1 - Not specified ; 0 - Unknown ; 1 - PK or PR or postal address number ascending ; 2 - Decreasing PK or PR or postal address number ; 3 - No reference"),
+        catv INTEGER OPTIONS (description = "Vehicle category (see in docs)."),
+        obs INTEGER OPTIONS (description = "Fixed obstacle hit (see in docs)."),
+        obsm INTEGER OPTIONS (description = "Mobile obstacle hit: -1 - Not specified ; 0 - No obstacle ; 1 - Pedestrian ; 2 - Vehicle ; 4 - Rail vehicle ; 5 - Domestic animal ; 6 - Wild animal ; 9 - Other"),
+        choc INTEGER OPTIONS (description = "Initial point of impact (see in docs)."),
+        manv INTEGER OPTIONS (description = "Main manoeuvre before the accident (see in docs)."),
+        motor INTEGER OPTIONS (description = "Type of vehicle engine: -1 - Unknown ; 0 - Unknown ; 1 - Hydrocarbon ; 2 - Hybrid electric ; 3 - Electric ; 4 - Hydrogen ; 5 - Human ; 6 - Other."),
+        occutc INTEGER OPTIONS (description = "Number of occupants in public transport.")
       );
 
   - id: upload_files
@@ -178,6 +224,21 @@ tasks:
             )
             VALUES (
               S.Num_Acc, S.jour, S.mois, S.an, S.hrmn, S.lum, S.dep, S.com, S.agg, S.int, S.atm, S.col, S.adr, S.lat, S.long
+            );
+
+      - id: bq_vehicles_merge_data
+        runIf: "{{ json(taskrun.value).type == 'vehicles'}}"
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          MERGE INTO {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }} AS T
+          USING {{kv('GCP_DATASET')}}.{{ json(taskrun.value).type }}_staging AS S
+          ON T.id_vehicule = S.id_vehicule
+          WHEN NOT MATCHED THEN
+            INSERT (
+              Num_Acc, id_vehicule, num_veh, senc, catv, obs, obsm, choc, manv, motor, occutc
+            )
+            VALUES (
+              S.Num_Acc, S.id_vehicule, S.num_veh, S.senc, S.catv, S.obs, S.obsm, S.choc, S.manv, S.motor, S.occutc
             );
 
       - id: bq_truncate_staging_table
