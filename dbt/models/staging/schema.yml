@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: staging
+    database: "{{ env_var('DBT_DATABASE', 'road-traffic-injuries-453410') }}"
+    schema: "{{ env_var('DBT_SCHEMA', 'rti_dataset') }}"
+
+    tables:
+      - name: users
+      - name: places
+      - name: details
+      - name: vehicles
