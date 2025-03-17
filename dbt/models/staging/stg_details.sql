@@ -1,6 +1,11 @@
-{{ config(materialized="table") }}
+{{ config(materialized="view") }}
 
-with stg_details as (select *, from {{ source("staging", "details") }})
+with stg_details as 
+(
+    select *
+    from {{ source("staging", "details") }}
+    where dep NOT IN ('971', '972', '973', '974', '975', '976', '977', '978', '984', '986', '987', '988', '989')
+)
 
 select
     *,
@@ -33,10 +38,10 @@ select
     date(an, mois, jour) as accident_date,
 
     lat / 100000000 as lat_corrected,
-    long / 100000000 as long_corrected
+    long / 100000000 as long_corrected,
 
 -- Création d'un champ 'position' de type POINT à partir des coordonnées lat et long
--- st_geogpoint(long_corrected, lat_corrected) as position
+    st_geogpoint(long / 100000000, lat / 100000000) as position
 from stg_details
 
 -- dbt build --select <model_name> --vars '{'is_test_run': 'false'}'
