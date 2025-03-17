@@ -42,12 +42,14 @@ models:
           materialized: view
       core:
           materialized: table
-vars:
-  payment_type_values: [1, 2, 3, 4, 5, 6]
 
 seeds:
-  road_traffic_injuries:  # Remplace par le nom de ton projet DBT
+  road_traffic_injuries:
     french_postal_codes:
       delimiter: ';'
       +column_types:
             Code_postal: string
+    french_departments:
+      delimiter: ','
+      +column_types:
+            num_dep: string
