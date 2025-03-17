@@ -7,7 +7,8 @@ with stg_places as
 )
 
 select
-    Num_Acc, vma
+    {{ dbt.safe_cast("Num_Acc", api.Column.translate_type("string")) }} as Num_Acc,
+    vma
 
 from stg_places
 

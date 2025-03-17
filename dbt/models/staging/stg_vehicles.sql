@@ -7,7 +7,7 @@ with stg_vehicles as
 )
 
 select
-    Num_Acc, 
+    {{ dbt.safe_cast("Num_Acc", api.Column.translate_type("string")) }} as Num_Acc,
     {{ dbt.safe_cast("id_vehicule", api.Column.translate_type("integer")) }} as id_vehicule,
     num_veh,
     {{ get_engine_type("motor") }} as engine_description,
