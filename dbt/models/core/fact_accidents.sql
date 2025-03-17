@@ -13,14 +13,22 @@ places as (
     from {{ ref('stg_places') }}
 ),
 
-users as (
-    select *
+-- 👉 Comptage des usagers par accident
+users_count as (
+    select
+        Num_Acc,
+        count(*) as nb_users
     from {{ ref('stg_users') }}
+    group by Num_Acc
 ),
 
-vehicles as (
-    select *
+-- 👉 Comptage des véhicules par accident
+vehicles_count as (
+    select
+        Num_Acc,
+        count(*) as nb_vehicles
     from {{ ref('stg_vehicles') }}
+    group by Num_Acc
 ),
 
 french_cp as (
@@ -47,9 +55,9 @@ select
     c.Code_postal,
     c.Nom_de_la_commune,
     p.vma,
-    u.gender_description as gender,
-    u.user_age_at_accident,
-    v.vehicle_category
+    uc.nb_users,
+    vc.nb_vehicles,
+
 from details d
 
 -- Jointure avec les départements
@@ -63,10 +71,10 @@ left join french_deps dp
 left join places p
     on d.Num_Acc = p.Num_Acc
 
--- Jointure avec les usagers
-left join users u
-    on d.Num_Acc = u.Num_Acc
 
--- Jointure avec les véhicules
-left join vehicles v
-    on d.Num_Acc = v.Num_Acc
+-- Jointure avec les agrégats users et véhicules
+left join users_count uc
+    on d.Num_Acc = uc.Num_Acc
+
+left join vehicles_count vc
+    on d.Num_Acc = vc.Num_Acc

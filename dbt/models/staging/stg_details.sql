@@ -8,7 +8,7 @@ with stg_details as
 )
 
 select
-    Num_Acc, 
+    {{ dbt.safe_cast("Num_Acc", api.Column.translate_type("string")) }} as Num_Acc,
     dep as dep_code, 
     com, 
     adr,
