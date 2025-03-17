@@ -8,8 +8,7 @@ with stg_details as
 )
 
 select
-    *,
-
+    Num_Acc, dep, com, adr,
     -- Construction d'une chaîne au format DATETIME : "YYYY-MM-DD HH:MM:00"
     datetime(
         date(an, mois, jour),  -- Crée une date à partir des colonnes an, mois, jour
