@@ -16,7 +16,7 @@ select
 from stg_vehicles
 
 -- dbt build --select <model_name> --vars '{'is_test_run': 'false'}'
-{% if var("is_test_run", default=true) %} limit 100 {% endif %}
+{% if var("is_test_run", default=true) %} limit 1000 {% endif %}
 
 
 
