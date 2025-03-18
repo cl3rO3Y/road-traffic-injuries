@@ -54,7 +54,6 @@ Add flows programmatically using Kestra's API:
 ````
 cd kestra
 curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@01_gcp_kv.yaml
-curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@02_gcp_rti.yaml
 curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@03_upload_all.yaml
 
 ````
@@ -70,3 +69,14 @@ Warning
 
 The GCP_CREDS service account contains sensitive information. Ensure you keep it secure and do not commit it to Git. Keep it as secure as your passwords.
 
+### dbt setup
+@todo
+
+
+Be careful on the location of dbt_rti dataset location.
+If you encounter this issue:
+```
+Database Error in model stg_details (models/staging/stg_details.sql)
+  Not found: Dataset road-traffic-injuries-453410:dbt_rti was not found in location EU
+```
+you have to replicate the dataset in BigQuery's interface in your geographic location and then make it the primary location.

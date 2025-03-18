@@ -141,8 +141,8 @@ tasks:
         atm INTEGER OPTIONS (description = "Weather conditions: -1 - Unknown ; 1 - Normal ; 2 - Light rain ; 3 - Heavy rain ; 4 - Snow - hail ; 5 - Fog - smoke ; 6 - Strong wind - storm ; 7 - Dazzling weather ; 8 - Overcast ; 9 - Other"),
         col INTEGER OPTIONS (description = "Type of collision: -1 - Unknown ; 1 - Two vehicles - head-on ; 2 - Two vehicles - rear ; 3 - Two vehicles - side ; 4 - Three or more vehicles - chain ; 5 - Three or more vehicles - multiple collisions ; 6 - Other collision ; 7 - No collision"),
         adr STRING OPTIONS (description = "Postal address: variable entered for accidents occurring in built-up areas."),
-        lat FLOAT64 OPTIONS (description = "Latitude."),
-        long FLOAT64 OPTIONS (description = "Longitude")
+        lat STRING OPTIONS (description = "Latitude."),
+        long STRING OPTIONS (description = "Longitude")
       );
 
   - id: bq_vehicles_table
@@ -279,10 +279,14 @@ tasks:
           ON T.Num_Acc = S.Num_Acc
           WHEN NOT MATCHED THEN
             INSERT (
-              Num_Acc, jour, mois, an, hrmn, lum, dep, com, agg, int, atm, col, adr, lat, long
+              Num_Acc, jour, mois, an, hrmn, lum, dep, com, agg, int, atm, col, adr, 
+              lat, long
             )
             VALUES (
-              S.Num_Acc, S.jour, S.mois, S.an, S.hrmn, S.lum, S.dep, S.com, S.agg, S.int, S.atm, S.col, S.adr, S.lat, S.long
+              S.Num_Acc, S.jour, S.mois, S.an, S.hrmn, S.lum, S.dep, S.com, S.agg, 
+              S.int, S.atm, S.col, S.adr, 
+              CAST(REPLACE(S.lat, ',', '.') AS FLOAT64),
+              CAST(REPLACE(S.long, ',', '.') AS FLOAT64)
             );
 
       - id: bq_vehicles_merge_data
