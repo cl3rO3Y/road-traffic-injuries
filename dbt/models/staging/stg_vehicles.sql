@@ -8,7 +8,10 @@ with stg_vehicles as
 
 select
     {{ dbt.safe_cast("Num_Acc", api.Column.translate_type("string")) }} as Num_Acc,
-    {{ dbt.safe_cast("id_vehicule", api.Column.translate_type("integer")) }} as id_vehicule,
+    {{ dbt.safe_cast(
+        "REPLACE(REPLACE(id_vehicule, '\\u00a0', ''), ' ', '')", 
+        api.Column.translate_type("integer")
+        ) }} as id_vehicule,
     num_veh,
     {{ get_engine_type("motor") }} as engine_description,
     {{ get_vehicle_category("catv") }} as vehicle_category
