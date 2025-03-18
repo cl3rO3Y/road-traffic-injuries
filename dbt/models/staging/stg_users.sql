@@ -8,8 +8,14 @@ with stg_users as
 
 select
     {{ dbt.safe_cast("Num_Acc", api.Column.translate_type("string")) }} as Num_Acc,
-    {{ dbt.safe_cast("id_usager", api.Column.translate_type("integer")) }} as id_usager,
-    {{ dbt.safe_cast("id_vehicule", api.Column.translate_type("integer")) }} as id_vehicule,
+    {{ dbt.safe_cast(
+        "REPLACE(REPLACE(id_usager, '\\u00a0', ''), ' ', '')", 
+        api.Column.translate_type("integer")
+        ) }} as id_usager,
+    {{ dbt.safe_cast(
+        "REPLACE(REPLACE(id_vehicule, '\\u00a0', ''), ' ', '')", 
+        api.Column.translate_type("integer")
+        ) }} as id_vehicule,
     num_veh, 
     place, 
     an_nais,
