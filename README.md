@@ -54,7 +54,7 @@ Add flows programmatically using Kestra's API:
 ````
 cd kestra
 curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@01_gcp_kv.yaml
-curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@03_upload_all.yaml
+curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@02_upload_all.yaml
 
 ````
 
