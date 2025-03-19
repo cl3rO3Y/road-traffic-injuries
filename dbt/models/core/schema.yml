@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_details
+    description: |
+      This model corresponds to the staging details table for road traffic accidents.  
+      It applies an initial level of cleaning and filtering on raw data sourced from the `details.csv` file.
+
+      In particular, **accidents that occurred in overseas departments and territories (DOM-TOM)** are deliberately **excluded** from the analytical scope:
+      `971` (Guadeloupe), `972` (Martinique), `973` (French Guiana), `974` (Réunion), `975` (Saint Pierre and Miquelon),  
+      `976` (Mayotte), `977`, `978` (Saint Barthélemy and Saint Martin), `984` (French Southern Territories),  
+      `986` (Wallis and Futuna), `987` (French Polynesia), `988` (New Caledonia), `989` (Saint Pierre and Miquelon).
+
+      👉 **Filtering rationale:**
+      - These territories present very different geographic, social, and road infrastructure characteristics compared to mainland France.
+      - The primary analytical scope of this project focuses exclusively on mainland French departments.
+      - This exclusion ensures greater statistical consistency when comparing data across departments.
+
+    columns:
+      - name: Num_Acc
+        description: Unique identifier of the accident.
+      - name: dep_code
+        description: French department code.
+      - name: com
+        description: INSEE municipality code.
+      - name: adr
+        description: Street address or road name.
+      - name: accident_datetime
+        description: Date and time of the accident.
+      - name: accident_hour
+        description: Hour of the accident.
+      - name: accident_date
+        description: Date of the accident.
+      - name: lat
+        description: Latitude (geographical coordinate).
+      - name: long
+        description: Longitude (geographical coordinate).
+      - name: position
+        description: Geographical point.
