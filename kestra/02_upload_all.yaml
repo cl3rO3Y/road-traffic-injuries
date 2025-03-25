@@ -4,11 +4,6 @@ description: |
   Upload multiple non-patterned CSV files to GCS.
 
   Source: https://www.data.gouv.fr/fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2023/
-  The CSV Data used:
-    usagers-2023: https://www.data.gouv.fr/fr/datasets/r/68848e2a-28dd-4efc-9d5f-d512f7dbe66f 13.3Mo
-    vehicules-2023: https://www.data.gouv.fr/fr/datasets/r/146a42f5-19f0-4b3e-a887-5cd8fbef057b 6.1Mo
-    lieux-2023: https://www.data.gouv.fr/fr/datasets/r/8bef19bf-a5e4-46b3-b5f9-a145da4686bc 6.8Mo
-    caract-2023: https://www.data.gouv.fr/fr/datasets/r/104dbb32-704f-4e99-a71e-43563cb604f2 6.3Mo
 
 variables:
   file: "https://www.data.gouv.fr/fr/datasets/r/68848e2a-28dd-4efc-9d5f-d512f7dbe66f"
