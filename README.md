@@ -1,8 +1,10 @@
-# Road traffic injuries in France 🚘 🏥 🤕 🚑
+# Road traffic injuries in France 🚘 🤕 🚑
 
 ## Project description
 
-Road accidents are a major public safety concern, causing injuries, fatalities, and significant economic losses. This project aims to analyze annual datasets of traffic accidents in France from 2021 to 2023, sourced from [data.gouv.fr](https://www.data.gouv.fr/fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2023/). By leveraging data engineering tools, we will process, clean, and integrate these datasets to uncover key insights, such as accident hotspots, trends over time, and the impact of factors like speed limits, day of week and season.
+Road accidents are a major public safety concern, causing injuries, fatalities, and significant economic losses. This project aims to analyze annual datasets of traffic accidents in France, sourced from [data.gouv.fr](https://www.data.gouv.fr/fr/datasets/bases-de-donnees-annuelles-des-accidents-corporels-de-la-circulation-routiere-annees-de-2005-a-2023/). By leveraging data engineering tools, we will process, clean, and integrate these datasets to uncover key insights, such as accident hotspots, trends over time, and the impact of factors like speed limits, day of week and season.
+
+*Disclaimer*: This analysis focuses on data from 2021 to 2023, as earlier datasets have a different CSV format that would require additional adaptations.
 
 ## Preview
 
@@ -21,12 +23,9 @@ Road accidents are a major public safety concern, causing injuries, fatalities, 
 - **Containerization**: Docker
 - **Workflow Orchestration**: Kestra
 
-## Data architecture
+## Data pipeline
 
 @todo insert schema
-talk about the 4 used datasets and the 2 seeds.
-
-The pipeline comprised the following steps:
 
 Basic data are retrieved from **data.gouv.fr**. They include 4 csv files for each year:
 
@@ -39,6 +38,10 @@ Basic data are retrieved from **data.gouv.fr**. They include 4 csv files for eac
 
 Each csv file from data.gouv.fr is uploaded by Kestra to a Google Cloud bucket. It is then transformed into a BigQuery staging table. The staging table is then merged with the main table, and truncated.
 
+<p align="left">
+  <img alt="dbt pipeline" src="images/dbt_lineage.png" width=100%>
+</p>
+
 Then, with **dbt**, we perform a number of clean-ups and improvements:
 
 - keep only data from metropolitan France
@@ -46,7 +49,7 @@ Then, with **dbt**, we perform a number of clean-ups and improvements:
 - create a real geospatial POINT field,
 - transform key values into meaningful names via macros (gravity_description, gender_description etc).
 
-We also add 2 seeds, still supplied by data.gouv.fr:
+We also add 2 *seeds*, still supplied by data.gouv.fr:
 
 - *french_departments.csv*: mapping between the codes and the names of the French departments
 - *french_postal_codes.csv*: mapping between the INSEE code of a municipality and its name
@@ -60,17 +63,11 @@ Finally, we create a **fact_accidents.sql** table which aggregates the data for 
 - department name
 - maximum speed at accident location
 
-
-
-
 ## Running the project
 
 ## 0. Prerequisites
 
-➡️ **Install Terraform**
-- [instructions for Ubuntu](https://www.notion.so/Terraform-1a0f5c23d69f8039ae2af5846bf0a325?pvs=4#1b2f5c23d69f8034bfc3ec22bed031c8)
-
-- [general instructions](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+➡️ **Install Terraform** [instructions for Ubuntu](https://www.notion.so/Terraform-1a0f5c23d69f8039ae2af5846bf0a325?pvs=4#1b2f5c23d69f8034bfc3ec22bed031c8) ; [general instructions](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 
 ➡️ **Install [Docker Desktop](https://docs.docker.com/get-started/get-docker/)**.
 
@@ -89,7 +86,7 @@ Now that you have a service account with credentials stored in your local repo, 
 1. Navigate to the `variables.tf` file in the terraform folder of your local repo. Confirm that the variable "credentials" is referencing your service account credentials stored at "../my_creds.json"
 2. Also, update the variable "project" with the project ID you created in the previous steps for GCP setup.
 
-These two steps will connect your service account and project and allow terraform to create infrastructure.
+  These two steps will connect your service account and project and allow terraform to create infrastructure.
 
 3. Next you can init, plan, and apply the terraform infrastructure from your command line with:
 
@@ -101,7 +98,7 @@ terraform apply
 
 You may need to enter yes after planning and applying. Once complete you can navigate to GCP and confirm that the infrastructure has been built.
 
-NOTE: be sure to run `terraform destroy` after working on this project to eliminate those resources and prevent unnecessary spend.
+💡 NOTE: be sure to run `terraform destroy` after working on this project to eliminate those resources and prevent unnecessary spend.
 
 ### 3. Docker and Kestra
 
@@ -131,23 +128,34 @@ Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
 - GCP_BUCKET_NAME
 - GCP_DATASET.
 
-Warning
-
-The GCP_CREDS service account contains sensitive information. Ensure you keep it secure and do not commit it to Git. Keep it as secure as your passwords.
+⚠️ The GCP_CREDS service account contains sensitive information. Ensure you keep it secure and do not commit it to Git. Keep it as secure as your passwords.
 
 #### 4. dbt setup
 
-@todo
+1. Go to https://www.getdbt.com/ and create a free account.
+2. Create a dbt project:
+
+    1. In Choose a connection, select BigQuery, add GitHub connection, create dev, and prod environments.
+    2. Run Cloud IDE. Click on "Initialize DBT project".
+    3. Plan and execute all transformations:
+
+    ```bash
+    dbt build --vars '{'is_test_run': 'false'}'
+    ```
+
+### Troubleshooting
+
+#### BigQuery dataset "not found in location"
 
 Be careful on the location of dbt_rti dataset location.
-If you encounter this issue:
+If you encounter this kind of issue:
 
 ```bash
 Database Error in model stg_details (models/staging/stg_details.sql)
   Not found: Dataset road-traffic-injuries-453410:dbt_rti was not found in location EU
 ```
 
-you have to replicate the dataset in BigQuery's interface in your geographic location and then make it the primary location.
+💡 You have to replicate the dataset in BigQuery's interface in your geographic location and then make it the primary location.
 
 ## Possible Improvements
 
