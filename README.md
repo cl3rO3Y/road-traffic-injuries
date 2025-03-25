@@ -8,7 +8,9 @@ Road accidents are a major public safety concern, causing injuries, fatalities, 
 
 ## Preview
 
-@todo insert screenshot
+<p align="left">
+  <img alt="dashboard" src="images/rti_looker_studio_dashboard.png" width=100%>
+</p>
 
 [Link to the dashboard](https://lookerstudio.google.com/reporting/dc3527bf-b243-4f80-9981-8671b1b15bf2)
 

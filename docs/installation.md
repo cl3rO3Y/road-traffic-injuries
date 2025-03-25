@@ -69,7 +69,7 @@ Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
 
 ⚠️ The GCP_CREDS service account contains sensitive information. Ensure you keep it secure and do not commit it to Git. Keep it as secure as your passwords.
 
-#### 4. dbt setup
+### 4. dbt setup
 
 1. Go to https://www.getdbt.com/ and create a free account.
 2. Create a dbt project:
@@ -82,9 +82,9 @@ Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
     dbt build --vars '{'is_test_run': 'false'}'
     ```
 
-### Troubleshooting
+## Troubleshooting
 
-#### BigQuery dataset "not found in location"
+### BigQuery dataset "not found in location"
 
 Be careful on the location of dbt_rti dataset location.
 If you encounter this kind of issue:
