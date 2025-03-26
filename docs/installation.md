@@ -76,7 +76,7 @@ Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
 
     1. In Choose a connection, select BigQuery, add GitHub connection, create dev, and prod environments.
     2. Run Cloud IDE. Click on "Initialize DBT project".
-    3. Plan and execute all transformations:
+    3. Open the dbt project and run this so that the dbt pipeline is executed:
 
     ```bash
     dbt build --vars '{'is_test_run': 'false'}'

@@ -27,7 +27,9 @@ Road accidents are a major public safety concern, causing injuries, fatalities, 
 
 ## Data pipeline
 
-@todo insert schema
+<p align="left">
+  <img alt="dbt schema" src="images/road_traffic_injuries_pipeline.png" width=100%>
+</p>
 
 Basic data are retrieved from **data.gouv.fr**. They include 4 csv files for each year:
 
@@ -40,8 +42,8 @@ Basic data are retrieved from **data.gouv.fr**. They include 4 csv files for eac
 
 Each csv file from data.gouv.fr is uploaded by Kestra to a Google Cloud bucket. It is then transformed into a BigQuery staging table. The staging table is then merged with the main table, and truncated.
 
-<p align="left">
-  <img alt="dbt pipeline" src="images/dbt_lineage.png" width=100%>
+<p align="center">
+  <img alt="dbt pipeline" src="images/dbt_lineage.png" width=70%>
 </p>
 
 Then, with **dbt**, we perform a number of clean-ups and improvements:
