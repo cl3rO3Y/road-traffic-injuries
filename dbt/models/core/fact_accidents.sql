@@ -1,6 +1,5 @@
 {{ config(materialized="table") }}
 
--- CTE pour les tables sources
 with
     details as (select * from {{ ref("stg_details") }}),
     places as (
