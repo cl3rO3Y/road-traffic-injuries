@@ -2,7 +2,7 @@
 
 ## 0. Prerequisites
 
-➡️ Clone the repository:
+1. Clone the repository:
 
 Ensure you have cloned the repository to your local machine. Use the following command:
 
@@ -10,13 +10,13 @@ Ensure you have cloned the repository to your local machine. Use the following c
 git clone https://github.com/cl3rO3Y/road-traffic-injuries.git
 ```
 
-➡️ Install **Terraform**:
+2. Install Terraform:
 
    - [General instructions on HashiCorp site](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 
-  - [Instructions for Ubuntu](/docs/terraform_install_ubuntu.md)
+    - [Instructions for Ubuntu](/docs/terraform_install_ubuntu.md)
 
-➡️ Install **[Docker Desktop](https://docs.docker.com/get-started/get-docker/)**.
+3. Install [Docker Desktop](https://docs.docker.com/get-started/get-docker/).
 
 ### 1. Google Cloud Setup
 
