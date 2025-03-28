@@ -14,18 +14,18 @@
 
 1. Navigate to the [Google Cloud Platform Console](https://console.cloud.google.com/) and create an account if you do not already have one.
 2. [Create a new Google Project](https://developers.google.com/workspace/guides/create-project). Be sure to record the project ID from the home page of the project in the console.
-3. Navigate to the IAM portal in GCP and [create a service account](https://cloud.google.com/iam/docs/service-accounts-create). It is recommended to simply give this account the 'Owner' role, but this is over-permissioned. Feel free to limit permissions as needed.
+3. Navigate to the IAM portal in GCP and [create a service account](https://cloud.google.com/iam/docs/service-accounts-create). It is recommended to simply give this account the 'Owner' role, but this is over-permissioned. Feel free to limit permissions as needed. Ensure that the service account has sufficient permissions for all required resources, such as BigQuery and GCS.
 4. [Create a service account key](https://cloud.google.com/iam/docs/keys-create-delete) for your new service account. Be sure to select JSON download which will create a JSON file with your key and download it to your local system.
 5. Copy this downloaded json file into the home directory of your road-traffic-injuries repo previously created. Rename this file `my_creds.json`. This file is ignored with .gitignore so you should not worry about it being added to your repo.
 
 ### 2. Terraform Infrastructure
 
-Now that you have a service account with credentials stored in your local repo, you can terraform the cloud infrastructure. The terraform plan will create one bucket and a BigQuery dataset called rti_dataset.
+Now that you have a service account with credentials stored in your local repo, you can deploy the cloud infrastructure using Terraform. The Terraform plan will create one bucket and a BigQuery dataset called `rti_dataset`.
 
-1. Navigate to the `variables.tf` file in the terraform folder of your local repo. Confirm that the variable "credentials" is referencing your service account credentials stored at "../my_creds.json"
+1. Navigate to the `variables.tf` file located in the `terraform` directory of your local repository. Confirm that the variable "credentials" is referencing your service account credentials stored at "../my_creds.json"
 2. Also, update the variable "project" with the project ID you created in the previous steps for GCP setup.
 
-  These two steps will connect your service account and project and allow terraform to create infrastructure.
+    These two steps will connect your service account and project, allowing Terraform to create the infrastructure.
 
 3. Next you can init, plan, and apply the terraform infrastructure from your command line with:
 
@@ -43,13 +43,15 @@ You may need to enter yes after planning and applying. Once complete you can nav
 
 #### Kestra setup
 
+Ensure Docker Desktop is running before launching Kestra.
+
 Launch Kestra in Docker with:
 
 ```bash
 docker run --pull=always --rm -it -p 8080:8080 --user=root -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp kestra/kestra:latest server local
 ```
 
-Kestra is now available here: <http://localhost:8080/>
+Kestra is now accessible at: <http://localhost:8080/>
 
 Add flows programmatically using Kestra's API:
 
@@ -76,7 +78,7 @@ Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
 
     1. In Choose a connection, select BigQuery, add GitHub connection, create dev, and prod environments.
     2. Run Cloud IDE. Click on "Initialize DBT project".
-    3. Open the dbt project and run this so that the dbt pipeline is executed:
+    3. Open the dbt project and run this so that the dbt pipeline will be executed:
 
     ```bash
     dbt build --vars '{'is_test_run': 'false'}'
@@ -86,7 +88,6 @@ Configure Kestra Key/Values in Kestra's interface in Namespaces->KV Store.
 
 ### BigQuery dataset "not found in location"
 
-Be careful on the location of dbt_rti dataset location.
 If you encounter this kind of issue:
 
 ```bash
@@ -94,4 +95,6 @@ Database Error in model stg_details (models/staging/stg_details.sql)
   Not found: Dataset road-traffic-injuries-453410:dbt_rti was not found in location EU
 ```
 
-💡 You have to replicate the dataset in BigQuery's interface in your geographic location and then make it the primary location.
+Navigate to the BigQuery console, verify the dataset’s location under its details, and ensure it matches the specified geographic region in your dbt project settings.
+
+💡 If this is not the case, you have to replicate the dataset in BigQuery's interface in your geographic location and then make it the primary location.
