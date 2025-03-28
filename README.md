@@ -31,14 +31,14 @@ Road accidents are a major public safety concern, causing injuries, fatalities, 
   <img alt="dbt schema" src="images/road_traffic_injuries_pipeline.png" width=100%>
 </p>
 
-The basic data are retrieved from **data.gouv.fr**. They include 4 csv files for each year:
+The basic data are retrieved from **data.gouv.fr**. They include four csv files for each year:
 
 - `details` (*caractéristiques* in french)
 - `users` (*usagers* in french)
 - `vehicles` (*véhicules* in french)
 - `places` (*lieux* in french)
 
-**Kestra** creates four main BigQuery tables (`details.sql`, `users.sql`, `vehicles.sql`, `places.sql`) and 4 related staging tables. Staging tables are used to ensure data consistency and allow incremental updates before merging with the main tables.
+**Kestra** creates four main BigQuery tables (`details.sql`, `users.sql`, `vehicles.sql`, `places.sql`) and four related staging tables. Staging tables are used to ensure data consistency and allow incremental updates before merging with the main tables.
 
 Each csv file from data.gouv.fr is uploaded by Kestra to a Google Cloud bucket. It is then transformed into a BigQuery staging table. The staging table is then merged with the main table, and truncated.
 
